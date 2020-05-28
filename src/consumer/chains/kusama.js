@@ -120,10 +120,10 @@ const createBuyerDisburseTransaction = async (secret, sellerKey, challengeStake,
         if (status.isFinalized) {
           console.debug(`Hash: ${status.asFinalized}`);
           blockHash = `${status.asFinalized}`;
-          events.forEach(({ phase, event: { data, method, section } }) => {
-            console.debug(`\t' ${phase}: ${section}.${method}:: ${data}`);
+          events.forEach(({ state, event: { data, method, section } }) => {
+            console.debug(`\t' ${state}: ${section}.${method}:: ${data}`);
             if (`${method}` === 'NewMultisig') {
-              index = parseInt(phase._raw, 10);
+              index = parseInt(state._raw, 10);
             }
             console.debug('Transaction index:', index);
           });
@@ -170,7 +170,7 @@ const submitDisburseTransaction = async (secret, tx, proposal) => {
     const otherSignatories = [buyerAddress, juryAddress]
     const otherSignatoriesSorted = sortAddresses(otherSignatories, SS58Prefix);
 
-    const txs = []
+    let txs = []
     //We need to replicate initial disburse command thus, we check tx type
     if(tx.type == "settle_buyer"){
       txs = [
@@ -202,8 +202,8 @@ const submitDisburseTransaction = async (secret, tx, proposal) => {
         console.debug(`Status: ${status.type}`)
         if (status.isFinalized) {
           console.debug(`Hash: ${status.asFinalized}`);
-          events.forEach(({ phase, event: { data, method, section } }) => {
-            console.debug(`\t' ${phase}: ${section}.${method}:: ${data}`);
+          events.forEach(({ state, event: { data, method, section } }) => {
+            console.debug(`\t' ${state}: ${section}.${method}:: ${data}`);
           });
 
           resolve(`${status.asFinalized}`);
@@ -265,10 +265,10 @@ const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challeng
         if (status.isFinalized) {
           console.debug(`Hash: ${status.asFinalized}`);
           hash = `${status.asFinalized}`;
-          events.forEach(({ phase, event: { data, method, section } }) => {
-            console.debug(`\t' ${phase}: ${section}.${method}:: ${data}`);
+          events.forEach(({ state, event: { data, method, section } }) => {
+            console.debug(`\t' ${state}: ${section}.${method}:: ${data}`);
             if (`${method}` === 'NewMultisig') {
-              index = parseInt(phase._raw, 10);
+              index = parseInt(state._raw, 10);
             }
             console.debug('Transaction index:', index);
           });
@@ -339,10 +339,10 @@ const createFavorSellerTransaction = async (secret, escrowKey, buyerKey, sellerK
         if (status.isFinalized) {
           console.debug(`Hash: ${status.asFinalized}`);
           hash = `${status.asFinalized}`;
-          events.forEach(({ phase, event: { data, method, section } }) => {
-            console.debug(`\t' ${phase}: ${section}.${method}:: ${data}`);
+          events.forEach(({ state, event: { data, method, section } }) => {
+            console.debug(`\t' ${state}: ${section}.${method}:: ${data}`);
             if (`${method}` === 'NewMultisig') {
-              index = parseInt(phase._raw, 10);
+              index = parseInt(state._raw, 10);
             }
             console.debug('Transaction index:', index);
           });
