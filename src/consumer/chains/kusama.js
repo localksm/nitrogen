@@ -10,9 +10,11 @@ const fetch = require('node-fetch')
 const logger = require('../clientLogging')
 const hostConfiguration = require('../../config/config')
 const { createKeyMulti, encodeAddress, sortAddresses } = require('@polkadot/util-crypto');
+const axios = require('axios');
 
 // Construct
 const WsP = 'wss://kusama-rpc.polkadot.io'
+const explorerURL = 'https://kusama.subscan.io/api/'
 
 const multiplier = 1000000000000 //Multiplier to equal amount to 1 KSM
 const platformFees = 0.001 //Base platform fee (requires multiplier)
@@ -218,7 +220,20 @@ const submitDisburseTransaction = async (secret, tx, proposal) => {
 }
 
 const transactionHistory = async (accountId) => {
-  //fetch tx history
+    const explorerEndpoint = 'open/account/extrinsics'
+    try {
+        data = await axios.post(explorerURL+explorerEndpoint, {
+        address: address,
+        row: 20
+      })
+    } catch (error) {
+      console.error(error)
+    }
+    console.debug(data.data)
+    data.data.data.extrinsics.forEach((extr) => {
+      console.debug(extr)
+    });
+    return data.data
 }
 
 const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challengeStake, agreement, keys) => {
