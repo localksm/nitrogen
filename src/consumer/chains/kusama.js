@@ -12,7 +12,7 @@ const hostConfiguration = require('../../config/config')
 const { createKeyMulti, encodeAddress, sortAddresses } = require('@polkadot/util-crypto');
 
 // Construct
-const wsProvider = new WsProvider('wss://kusama-rpc.polkadot.io');
+const WsP = 'wss://kusama-rpc.polkadot.io'
 
 const multiplier = 1000000000000 //Multiplier to equal amount to 1 KSM
 const platformFees = 0.001 //Base platform fee (requires multiplier)
@@ -47,6 +47,7 @@ const configureEscrow = async (buyerPair, challengeStake, nativeAmount, escrowAd
   console.debug(nativeAmount)
   console.debug(escrowAddress)
 
+  const wsProvider = new WsProvider(WsP);
   const api = await ApiPromise.create({ provider: wsProvider });
   //Amount should be > than 0.01 which is minimum to consider account alive
   amount = (challengeStake + nativeAmount + platformFees) * multiplier
@@ -82,6 +83,7 @@ const initiateSettlement = async (secret, sellerAddress, juryAddress, challengeS
 const createBuyerDisburseTransaction = async (secret, sellerKey, challengeStake, nativeAmount, escrowKey) => {
     //approveAsMulti <- not final release multiSig
     //https://polkadot.js.org/api/substrate/extrinsics.html#approveasmulti-threshold-u16-other-signatories-vec-t-accountid-maybe-timepoint-option-timepoint-t-blocknumber-call-hash-u8-32
+    const wsProvider = new WsProvider(WsP);
     const api = await ApiPromise.create({ provider: wsProvider });
     const keyring = new Keyring(); //default curve ed25519
     const juryKey = hostConfiguration.juryKey
@@ -108,9 +110,9 @@ const createBuyerDisburseTransaction = async (secret, sellerKey, challengeStake,
       api.tx.balances.transfer(platformKey, platformFees*multiplier) //paymentToPlatform
     ];
 
-    const transactions = api.tx.multisig.batch(txs)
+    const transactions = api.tx.utility.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 640000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(buyerPair, ({ events = [], status }) => {
@@ -153,6 +155,7 @@ const createBuyerDisburseTransaction = async (secret, sellerKey, challengeStake,
 const submitDisburseTransaction = async (secret, tx, proposal) => {
     //https://polkadot.js.org/api/substrate/extrinsics.html#asmulti-threshold-u16-other-signatories-vec-t-accountid-maybe-timepoint-option-timepoint-t-blocknumber-call-box-t-as-trait-call
     console.debug(tx)
+    const wsProvider = new WsProvider(WsP);
     const api = await ApiPromise.create({ provider: wsProvider });
     const keyring = new Keyring(); //default curve ed25519
     const sellerPair = keyring.addFromUri(secret); // Secret should be seed or mnemonic
@@ -194,8 +197,8 @@ const submitDisburseTransaction = async (secret, tx, proposal) => {
       ];
     }
 
-    const transactions = api.tx.multisig.batch(txs)
-    const multi_tx = api.tx.multisig.asMulti(threshold, otherSignatoriesSorted, timepoint, transactions, 230000000);
+    const transactions = api.tx.utility.batch(txs)
+    const multi_tx = api.tx.multisig.asMulti(threshold, otherSignatoriesSorted, timepoint, transactions.method.toHex(), false, 640000000);
 
     const promise = new Promise((resolve, reject) => {
       multi_tx.signAndSend(sellerPair, ({ events = [], status }) => {
@@ -222,6 +225,7 @@ const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challeng
 //ruling in favor of buyer - pay challenge fees to jury, platform, and merge escrow to buyers account
 //Assume escrow is encoded BUT buyer address is unencoded
     const nativeAmount = agreement.body.offerAmount
+    const wsProvider = new WsProvider(WsP);
     const api = await ApiPromise.create({ provider: wsProvider });
     const keyring = new Keyring(); //default curve ed25519
 
@@ -253,9 +257,9 @@ const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challeng
       api.tx.balances.transfer(juryAddress, challengeStake*multiplier) //paymentJury
     ];
 
-    const transactions = api.tx.multisig.batch(txs)
+    const transactions = api.tx.utility.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 640000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(juryPair, ({ events = [], status }) => {
@@ -298,7 +302,7 @@ const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challeng
 
 const createFavorSellerTransaction = async (secret, escrowKey, buyerKey, sellerKey, challengeStake, nativeAmount) => {
 //ruling in favor of seller - pay challenge fees to jury, offerAmount to seller, and merge escrow to buyers account
-
+    const wsProvider = new WsProvider(WsP);
     const api = await ApiPromise.create({ provider: wsProvider });
     const keyring = new Keyring(); //default curve ed25519
 
@@ -327,9 +331,9 @@ const createFavorSellerTransaction = async (secret, escrowKey, buyerKey, sellerK
       api.tx.balances.transfer(juryAddress, challengeStake*multiplier) //paymentJury
     ];
 
-    const transactions = api.tx.multisig.batch(txs)
+    const transactions = api.tx.utility.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 640000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(juryPair, ({ events = [], status }) => {
