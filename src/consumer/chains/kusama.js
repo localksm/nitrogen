@@ -64,7 +64,15 @@ const configureEscrow = async (buyerPair, challengeStake, nativeAmount, escrowAd
 }
 
 const viewEscrow = async (accountId) => {
-    //return escrow info
+    const wsProvider = new WsProvider(WsP);
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    let data = await api.query.system.account(address);
+    let { data: { free: currentFree }, nonce: previousNonce } = data
+    console.debug(`${address} has a balance of ${currentFree}, nonce ${previousNonce}`);
+    console.debug(data)
+
+    return data
 }
 
 const initiateSettlement = async (secret, sellerAddress, juryAddress, challengeStake, nativeAmount, proposal) => {
