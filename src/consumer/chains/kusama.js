@@ -108,9 +108,9 @@ const createBuyerDisburseTransaction = async (secret, sellerKey, challengeStake,
       api.tx.balances.transfer(platformKey, platformFees*multiplier) //paymentToPlatform
     ];
 
-    const transactions = api.tx.utility.batch(txs)
+    const transactions = api.tx.multisig.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.utility.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(buyerPair, ({ events = [], status }) => {
@@ -194,8 +194,8 @@ const submitDisburseTransaction = async (secret, tx, proposal) => {
       ];
     }
 
-    const transactions = api.tx.utility.batch(txs)
-    const multi_tx = api.tx.utility.asMulti(threshold, otherSignatoriesSorted, timepoint, transactions);
+    const transactions = api.tx.multisig.batch(txs)
+    const multi_tx = api.tx.multisig.asMulti(threshold, otherSignatoriesSorted, timepoint, transactions, 230000000);
 
     const promise = new Promise((resolve, reject) => {
       multi_tx.signAndSend(sellerPair, ({ events = [], status }) => {
@@ -253,9 +253,9 @@ const createFavorBuyerTransaction = async (secret, escrowKey, buyerKey, challeng
       api.tx.balances.transfer(juryAddress, challengeStake*multiplier) //paymentJury
     ];
 
-    const transactions = api.tx.utility.batch(txs)
+    const transactions = api.tx.multisig.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.utility.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(juryPair, ({ events = [], status }) => {
@@ -327,9 +327,9 @@ const createFavorSellerTransaction = async (secret, escrowKey, buyerKey, sellerK
       api.tx.balances.transfer(juryAddress, challengeStake*multiplier) //paymentJury
     ];
 
-    const transactions = api.tx.utility.batch(txs)
+    const transactions = api.tx.multisig.batch(txs)
     //Assuming this is the first multi call thus timepoint -> null
-    const tx = api.tx.utility.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash);
+    const tx = api.tx.multisig.approveAsMulti(threshold, otherSignatoriesSorted, null ,transactions.method.hash, 230000000);
 
     const promise = new Promise((resolve, reject) => {
       tx.signAndSend(juryPair, ({ events = [], status }) => {
